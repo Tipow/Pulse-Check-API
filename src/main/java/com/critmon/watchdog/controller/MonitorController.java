@@ -132,7 +132,7 @@ public class MonitorController {
     //get all monitors (GET /monitors)
     @GetMapping
     public ResponseEntity<Collection<Monitor>> getAll() {
-        return ResponseEntity.ok(MonitorService.getAllmonitors());
+        return ResponseEntity.ok(monitorService.getAllmonitors());
     }
 
 
