@@ -7,14 +7,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class MonitoredDeviceService {
-       private static final Logger log = LoggerFactory.getLogger(MonitoredDeviceService.class);
-       private final Map<String, MonitoredDevice> monitoredDevices = new ConcurrentHashMap<>();
+       private static final Logger log = LoggerFactory.getLogger(MonitoredDeviceService.class); //creates logger
+       private final Map<String, MonitoredDevice> monitoredDevices = new ConcurrentHashMap<>();// in memory db
 
        //registers a device
        public MonitoredDevice register(String id, int timeoutSeconds, String alertMail) {
@@ -31,11 +32,12 @@ public class MonitoredDeviceService {
               return device;
        }
 
-
+        //find a device logic
        public Optional<MonitoredDevice> findById(String id){
            return Optional.ofNullable(monitoredDevices.get(id));
        }
 
+        //heartbeat logic
        public MonitoredDevice heartbeat(String id) {
            MonitoredDevice device = getDeviceOrThrow(id);
 
@@ -49,30 +51,51 @@ public class MonitoredDeviceService {
            return device;
        }
 
+        //pause timer logic
        public MonitoredDevice pause(String id) {
            MonitoredDevice device = getDeviceOrThrow(id);
+           if (device.getStatus() == MonitoredDevice.Status.DOWN) {
+               throw new IllegalStateException("Cannot pause a DOWN device: " + id);
+           }
+           if (device.getStatus() == MonitoredDevice.Status.PAUSED) {
+               throw new IllegalStateException("Device is already paused: " + id);
+           }
 
-           device.pause();
+            device.pause();
 
            log.info("[PAUSED] Device {} paused", id);
            return device;
        }
 
-    public void checkExpiredMonitors() {
+       //deleting a device
+        public void delete(String id) {
+            getDeviceOrThrow(id);
+            monitoredDevices.remove(id);
+            log.info("[DELETED] device {} removed", id);
+        }
+
+        // checking for "dead" devices (didnt send a ping before timeout)
+        public void checkExpiredDevices() {
+           if (monitoredDevices.isEmpty()) return; // do not check if there are no devices being monitored
         Instant now = Instant.now();
 
-        for (MonitoredDevice device : monitoredDevices.values()) {
+            for (MonitoredDevice device : monitoredDevices.values()) {
 
-            if (device.getStatus() == MonitoredDevice.Status.ACTIVE
+                if (device.getStatus() == MonitoredDevice.Status.ACTIVE
                     && now.isAfter(device.getExpiresAt())) {
 
                 device.setStatus(MonitoredDevice.Status.DOWN);
 
                 log.error(
                         "[ALERT] Device {} is DOWN | time={} | email={}", device.getId(), now, device.getAlertMail());
+                }
             }
         }
-    }
+
+        //returns all devices
+        public Collection<MonitoredDevice> getAllMonitoredDevices() {
+            return monitoredDevices.values();
+        }
        
         private MonitoredDevice getDeviceOrThrow(String id) {
         MonitoredDevice device = monitoredDevices.get(id);
