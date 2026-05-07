@@ -13,11 +13,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/monitoredDevices")
-public class MonitoredDeviceController {
+public class MonitorController {
     private final MonitoredDeviceService monitoredDeviceService;
 
     // constructor Injection
-    public MonitoredDeviceController(MonitoredDeviceService monitoredDeviceService) {
+    public MonitorController(MonitoredDeviceService monitoredDeviceService) {
         this.monitoredDeviceService = monitoredDeviceService;
     }
 
