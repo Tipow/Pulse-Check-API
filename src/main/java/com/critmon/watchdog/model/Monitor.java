@@ -2,7 +2,7 @@ package com.critmon.watchdog.model;
 
 import java.time.Instant;
 
-public class MonitoredDevice {
+public class Monitor {
     public enum Status {ACTIVE, PAUSED, DOWN} //states
 
     private String id;
@@ -11,7 +11,7 @@ public class MonitoredDevice {
     private Status status; //tracks device state
     private Instant expiresAt; //time at which device would be considered down if no heartbeat is received
 
-    public MonitoredDevice(String id, int timeoutSeconds, String alertMail) {
+    public Monitor(String id, int timeoutSeconds, String alertMail) {
         this.id = id;
         this.timeoutSeconds = timeoutSeconds;
         this.alertMail = alertMail;
