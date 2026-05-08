@@ -1,5 +1,7 @@
 package com.critmon.watchdog.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.Instant;
 
 public class Monitor {
@@ -28,6 +30,10 @@ public class Monitor {
         this.status = Status.ACTIVE;
     }
 
+
+
+
+    @JsonIgnore
     public boolean isExpired() {
         return status == Status.ACTIVE && Instant.now().isAfter(expiresAt);
     }// if expired, send alert
