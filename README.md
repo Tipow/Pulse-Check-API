@@ -27,6 +27,7 @@ firing a log alert immediately.
 **Model** (`Monitor`) represents a single device and tracks its current
 state through four possible statuses: `ACTIVE`, `PAUSED`, `DOWN`,
 and `UNDER_RECOVERY`.
+
 ---
 
 ## Set Up
