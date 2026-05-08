@@ -6,17 +6,17 @@ public class Monitor {
     public enum Status {ACTIVE, PAUSED, DOWN, UNDER_RECOVERY} //states
 
     private String id;
-    private int timeoutSeconds;
-    private String alertMail; //where alerts would be sent
+    private int timeout;
+    private String alertEmail; //where alerts would be sent
     private Status status; //tracks device state
     private Instant expiresAt; //time at which device would be considered down if no heartbeat is received
 
-    public Monitor(String id, int timeoutSeconds, String alertMail) {
+    public Monitor(String id, int timeout, String alertEmail) {
         this.id = id;
-        this.timeoutSeconds = timeoutSeconds;
-        this.alertMail = alertMail;
+        this.timeout = timeout;
+        this.alertEmail = alertEmail;
         this.status = Status.ACTIVE;
-        this.expiresAt = Instant.now().plusSeconds(timeoutSeconds);
+        this.expiresAt = Instant.now().plusSeconds(timeout);
     }
 
     public void pause() {
@@ -24,7 +24,7 @@ public class Monitor {
     }
 
     public void resetTimer() {
-        this.expiresAt = Instant.now().plusSeconds(timeoutSeconds);
+        this.expiresAt = Instant.now().plusSeconds(timeout);
         this.status = Status.ACTIVE;
     }
 
@@ -41,12 +41,12 @@ public class Monitor {
         return id;
     }
 
-    public int getTimeoutSeconds() {
-        return timeoutSeconds;
+    public int getTimeout() {
+        return timeout;
     }
 
-    public String getAlertMail() {
-        return alertMail;
+    public String getAlertEmail() {
+        return alertEmail;
     }
 
     public Instant getExpiresAt() {

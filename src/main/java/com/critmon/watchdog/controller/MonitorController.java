@@ -26,14 +26,14 @@ public class MonitorController {
     public ResponseEntity<?> register(@RequestBody Map<String, Object> body) {
 
         String id = (String) body.get("id");
-        int timeoutSeconds = (Integer) body.get("timeoutSeconds");
-        String alertMail = (String) body.get("alertMail");
+        int timeout = (Integer) body.get("timeout");
+        String alertEmail = (String) body.get("alert_email");
 
-        if (id == null || timeoutSeconds <= 0) {
+        if (id == null || timeout <= 0) {
             return ResponseEntity.badRequest().body(Map.of("error", "id and timeout are required"));
         }
         try {
-            Monitor monitor = monitorService.register(id, timeoutSeconds, alertMail);
+            Monitor monitor = monitorService.register(id, timeout, alertEmail);
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     Map.of(
                             "message", "Monitor created successfully",
@@ -42,7 +42,7 @@ public class MonitorController {
                     )
             );
         } catch (IllegalArgumentException e) {
-            // duplicate id — 409 Conflict
+            // duplicate id
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                     Map.of("error", e.getMessage())
             );

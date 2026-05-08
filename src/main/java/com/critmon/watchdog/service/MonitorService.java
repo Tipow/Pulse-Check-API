@@ -18,15 +18,15 @@ public class MonitorService {
        private final Map<String, Monitor> monitors = new ConcurrentHashMap<>();// in memory db
 
        //registers a monitor
-       public Monitor register(String id, int timeoutSeconds, String alertMail) {
+       public Monitor register(String id, int timeout, String alertEmail) {
               if (monitors.containsKey(id)) {
                   throw new IllegalArgumentException("Monitor already exists");
               }
-              if(timeoutSeconds <= 0){
+              if(timeout <= 0){
                   throw new IllegalArgumentException("Timeout must be greater than 0");
               }
 
-              Monitor monitor = new Monitor(id, timeoutSeconds, alertMail);
+              Monitor monitor = new Monitor(id, timeout, alertEmail);
               monitors.put(id, monitor);
               log.info("[REGISTERED] Device {} expires at {}" , id, monitor.getExpiresAt());
               return monitor;
@@ -44,7 +44,7 @@ public class MonitorService {
            if (monitor.getStatus() == Monitor.Status.DOWN) {
                throw new IllegalStateException("Cannot heartbeat a DOWN monitor: " + id);
            }
-
+           
            monitor.resetTimer();
 
            log.info("[HEARTBEAT] Monitor {} reset. Expired at {}" , id, monitor.getExpiresAt());
@@ -122,8 +122,9 @@ public class MonitorService {
 
                 monitor.setStatus(Monitor.Status.DOWN);
 
-                log.error(
-                        "[ALERT] Device {} is DOWN | time={} | email={}", monitor.getId(), now, monitor.getAlertMail());
+                    log.error(
+                            "{{\"ALERT\": \"Device {} is down!\", \"time\": \"{}\"}}",
+                            monitor.getId(), now);
                 }
             }
         }
