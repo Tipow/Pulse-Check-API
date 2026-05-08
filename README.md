@@ -8,21 +8,42 @@ Built with **Java  & Spring Boot.**
 ## Architecture Diagram
 ![Architecture Diagram](docs/sequencediagram.drawio.png)
 
-## Set Up
-**Requirements:** Java 17+, Maven 
+## How It Works
 
+The service is built in four layers:
+
+**Controller** (`MonitorController`) receives all HTTP requests and delegates
+to the service layer. It handles registration, heartbeat, pause, recovery,
+and status queries, returning appropriate HTTP status codes for each outcome.
+
+**Service** (`MonitorService`) contains the core business logic — state
+transitions, timer resets, and alert triggering. All monitor state lives in
+a `ConcurrentHashMap` for thread-safe in-memory storage.
+
+**Scheduler** (`MonitorScheduler`) runs every 5 seconds in the background.
+It scans all active monitors and marks any with an expired timer as `DOWN`,
+firing a log alert immediately.
+
+**Model** (`Monitor`) represents a single device and tracks its current
+state through four possible statuses: `ACTIVE`, `PAUSED`, `DOWN`,
+and `UNDER_RECOVERY`.
+---
+
+## Set Up
+**Requirements:** Java 17+, Maven 3.8+
+
+##### Clone repository
 ```bash
 git clone https://github.com/Tipow/Pulse-Check-API.git
+```
+
+#### Run
+```
 mvn spring-boot:run
 ```
+
 The API starts on http://localhost:8080
 
-## Notes
-* The API accepts timeoutSeconds in seconds, matching the challenge requirements.
-* Internally, the system converts this into an expiration timestamp using Instant.now() and recalculates on each heartbeat.
-* Monitor state is stored in-memory using a ConcurrentHashMap, keeping the implementation lightweight and fast.
-* A background scheduler continuously checks for expired monitors and transitions them to DOWN.
-* State transitions are explicitly managed to avoid invalid flows (e.g., only DOWN → UNDER_RECOVERY → ACTIVE).
 
 ---
 ## Endpoints
@@ -55,7 +76,7 @@ The API starts on http://localhost:8080
 {
   "message": "Monitor created successfully",
   "id": "device-123",
-  "expires_at": "2025-01-01T12:01:00Z"
+  "expires_at": "2025-05-08T12:01:00Z"
 }
 ```
 
@@ -70,9 +91,9 @@ The API starts on http://localhost:8080
 **Response — 200 OK**
 ```json
 {
+  "remainingSeconds": 60,
   "message": "Heartbeat received. Timer resets.",
-  "expiresAt": "2025-01-01T12:02:00Z",
-  "remainingSeconds": 60
+  "expiresAt": "2025-01-01T12:02:00Z"
 }
 ```
 
@@ -90,8 +111,8 @@ Sending a heartbeat automatically un-pauses and restarts the timer.
 **Response — 200 OK**
 ```json
 {
-  "message": "Monitor paused",
-  "status": "PAUSED"
+  "status": "PAUSED",
+  "message": "Monitor paused"
 }
 ```
 
@@ -109,8 +130,8 @@ re-alert while recovery is in progress.
 **Response — 200 OK**
 ```json
 {
-  "message": "Monitor is now under recovery",
   "id": "device-123",
+  "message": "Monitor is now under recovery",
   "status": "UNDER_RECOVERY"
 }
 ```
@@ -128,10 +149,10 @@ Brings the device back online. Resets the timer and sets status to ACTIVE.
 **Response — 200 OK**
 ```json
 {
-  "message": "Monitor recovery complete. Now active.",
   "id": "device-123",
   "status": "ACTIVE",
-  "expiresAt": "2025-01-01T12:05:00Z"
+  "expiresAt": "2025-05-08T12:05:00Z",
+  "message": "Monitor recovery complete. Now active."
 }
 ```
 
