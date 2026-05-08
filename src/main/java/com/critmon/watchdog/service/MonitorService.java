@@ -44,7 +44,11 @@ public class MonitorService {
            if (monitor.getStatus() == Monitor.Status.DOWN) {
                throw new IllegalStateException("Cannot heartbeat a DOWN monitor: " + id);
            }
-           
+
+           if (monitor.getStatus() == Monitor.Status.UNDER_RECOVERY) {
+               throw new IllegalStateException("Monitor is under recovery: " + id);
+           }
+
            monitor.resetTimer();
 
            log.info("[HEARTBEAT] Monitor {} reset. Expired at {}" , id, monitor.getExpiresAt());
