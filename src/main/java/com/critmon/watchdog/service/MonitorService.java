@@ -67,6 +67,42 @@ public class MonitorService {
            return monitor;
        }
 
+        //device attached to a dead monitor under recovery
+        public Monitor startRecovery(String id) {
+            Monitor monitor = getMonitorOrThrow(id);
+
+            if (monitor.getStatus() != Monitor.Status.DOWN) {
+                throw new IllegalStateException("Only DOWN monitors can enter recovery");
+            }
+
+            monitor.setStatus(Monitor.Status.UNDER_RECOVERY);
+
+            log.info(
+                    "{{\"RECOVERY_START\": \"Monitor {} is under technician repair\", \"time\": \"{}\"}}",
+                    id, Instant.now()
+            );
+
+            return monitor;
+        }
+
+        //recovery complete
+        public Monitor completeRecovery(String id) {
+            Monitor monitor = getMonitorOrThrow(id);
+
+            if (monitor.getStatus() != Monitor.Status.UNDER_RECOVERY) {
+                throw new IllegalStateException("Only UNDER_RECOVERY monitors can complete recovery");
+            }
+
+            monitor.resetTimer(); // sets status back to ACTIVE and resets expiresAt
+
+            log.info(
+                    "{{\"RECOVERY_COMPLETE\": \"Monitor {} is back online\", \"time\": \"{}\"}}",
+                    id, Instant.now()
+            );
+
+            return monitor;
+        }
+
        //deleting a monitor
         public void delete(String id) {
             getMonitorOrThrow(id);

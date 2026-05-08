@@ -107,6 +107,57 @@ public class MonitorController {
         }
     }
 
+// recovery (POST /monitors/{id}/recovery)
+    @PostMapping("/{id}/recovery")
+    public ResponseEntity<?> recovery(@PathVariable String id) {
+
+        try {
+            Monitor monitor = monitorService.startRecovery(id);
+            return ResponseEntity.ok(
+                    Map.of(
+                            "message", "Monitor is now under recovery",
+                            "id", monitor.getId(),
+                            "status", monitor.getStatus()
+                    )
+            );
+        } catch (IllegalArgumentException e) {
+            // monitor not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    Map.of("error", e.getMessage())
+            );
+        } catch (IllegalStateException e) {
+            // monitor is not DOWN
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    Map.of("error", e.getMessage())
+            );
+        }
+    }
+
+    //recovery complete (POST /monitors/{id}/recovery/complete)
+    @PostMapping("/{id}/recovery/complete")
+    public ResponseEntity<?> completeRecovery(@PathVariable String id) {
+
+        try {
+            Monitor monitor = monitorService.completeRecovery(id);
+            return ResponseEntity.ok(
+                    Map.of(
+                            "message", "Monitor recovery complete. Now active.",
+                            "id", monitor.getId(),
+                            "status", monitor.getStatus(),
+                            "expiresAt", monitor.getExpiresAt()
+                    )
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    Map.of("error", e.getMessage())
+            );
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    Map.of("error", e.getMessage())
+            );
+        }
+    }
+
 
     //get a device (GET /monitors/{id})
     @GetMapping("/{id}")

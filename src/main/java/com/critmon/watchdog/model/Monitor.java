@@ -3,7 +3,7 @@ package com.critmon.watchdog.model;
 import java.time.Instant;
 
 public class Monitor {
-    public enum Status {ACTIVE, PAUSED, DOWN} //states
+    public enum Status {ACTIVE, PAUSED, DOWN, UNDER_RECOVERY} //states
 
     private String id;
     private int timeoutSeconds;
