@@ -40,7 +40,7 @@ git clone https://github.com/Tipow/Pulse-Check-API.git
 
 #### Run
 ```
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
 
 The API starts on http://localhost:8080
